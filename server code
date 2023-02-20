@@ -1,0 +1,40 @@
+import socket
+import datetime
+import time
+import uuid
+address="127.0.0.1"
+port = 8080
+receive_buffer_size = 4096
+def proxy_server():
+    try:
+        mysocket = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+        mysocket.bind((address,port))
+        mysocket.listen()
+        print("server is listening")
+        while True:
+            cSocket,cAddress= mysocket.accept() # cSocket is client socket from request
+            print(f"Connection from {cAddress} accepted")
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
+            print(current_time)
+            with cSocket:
+                cRequest=cSocket.recv(receive_buffer_size).decode() #receive client request
+                cIP= cRequest.split()[1]
+                serverSocket=socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+                serverSocket.connect((cIP,80)) #connect to destination specified by client
+                serverSocket.sendall(cRequest.encode())#send client request to destination server
+                t2 = time.localtime()
+                current_time2 = time.strftime("%H:%M:%S", t2)
+                print(f"time of actual request {current_time2}")
+                received=serverSocket.recv(receive_buffer_size)#recieve response from destination server
+                t3 = time.localtime()
+                current_time3 = time.strftime("%H:%M:%S", t3)
+                print(f"time of request receival {current_time3}")
+                cSocket.sendall(received)#send response back to client
+                t4 = time.localtime()
+                current_time4 = time.strftime("%H:%M:%S", t4)
+                print(f"time of response sent back to client {current_time4}")
+    except:
+        print("error on proxy server side")
+
+proxy_server()
