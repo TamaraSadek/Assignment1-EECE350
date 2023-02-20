@@ -1,0 +1,31 @@
+import socket
+import datetime
+import time
+import uuid
+
+receive_buffer_size = 4096
+website=input("enter IP address: ")
+proxy_host="localhost"
+proxy_port=8080
+def client_server():
+    try:
+        client_socket=socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+        client_socket.connect((proxy_host,proxy_port))# connect to proxy server
+        request="GET http://"+website
+        client_socket.sendall(request.encode())#send request to proxy server
+        startTime=time.time()
+        t5 = time.localtime()
+        current_time5 = time.strftime("%H:%M:%S", t5)
+        print(f"time of request sent to proxy server {current_time5}")
+        response=client_socket.recv(receive_buffer_size) #receive response from proxy server
+        endTime=time.time()
+        t6 = time.localtime()
+        current_time6 = time.strftime("%H:%M:%S", t6)
+        print(f"response={response} was received at {current_time6}")
+        roundTrip=endTime-startTime
+        print(f"roundtrip time = {roundTrip}")
+        print ("MAC address: ",hex(uuid.getnode()))
+    except:
+        print("Error on client side")
+
+client_server()
